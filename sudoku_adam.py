@@ -1,7 +1,6 @@
 import random as rn
 import logging
 from datetime import datetime
-import multiprocessing
 import time
 
 logging.basicConfig(filename='sudoku.log', encoding='utf-8', level=logging.DEBUG)
@@ -121,17 +120,12 @@ class SudokuGame:
             },
         }
         self.puzzle_2d = []
-        self.sections = {
-            'S1': [0, 1, 2],
-            'S2': [3, 4, 5],
-            'S3': [6, 7, 8],
-        }
+        self.solution_2d = None
         self.name = name
         self.grid_dict = {}
         self.column_dict = {}
         self.row_dict = {}
         self.m = 9
-        self.solution_2d = None
         self.generate_puzzle()
         self.get_current_values()
         self.raw_grid_2d_arr()
@@ -154,12 +148,10 @@ class SudokuGame:
                 while given == prev_int:
                     given = rn.randint(1, 9)
                 cell.value = given
+                cell.given = True
                 prev_int = given
         self.get_current_values()
         self.raw_grid_2d_arr()
-        for grid in self.grid_dict:
-            if len(set(self.grid_dict.get(grid))) <= 2:
-                pass
 
     def print_grid(self):
         grids = []
@@ -186,29 +178,15 @@ class SudokuGame:
             print('----------------------------------')
 
     def print_game(self):
-        grids = []
-        for g in self.puzzle.keys():
-            g = self.puzzle.get(g)
-            y = [(i, (x+y), g.get(x+y).value) for i, (x, y) in enumerate(g, 1)]
-            z = [(x[2]) for i, x in enumerate(y)]
-            grids.append(z)
         print(f"\n{str(self.name)}'s Sudoku Game:")
 
+
         print('-------------------------')
-        for x in self.sections.keys():
+        for x in range(9):
             print('| {} {} {} | {} {} {} | {} {} {} |'.format(
-                *(grids[self.sections.get(x)[0]][0:3] +
-                  grids[self.sections.get(x)[1]][0:3] +
-                  grids[self.sections.get(x)[2]][0:3])))
-            print('| {} {} {} | {} {} {} | {} {} {} |'.format(
-                *(grids[self.sections.get(x)[0]][3:6] +
-                  grids[self.sections.get(x)[1]][3:6] +
-                  grids[self.sections.get(x)[2]][3:6])))
-            print('| {} {} {} | {} {} {} | {} {} {} |'.format(
-                *(grids[self.sections.get(x)[0]][6:9] +
-                  grids[self.sections.get(x)[1]][6:9] +
-                  grids[self.sections.get(x)[2]][6:9])))
-            print('-------------------------')
+                *(self.puzzle_2d[x])))
+            if x != 0 and x % 3 == 2:
+                print('|-----------------------|')
 
     def get_current_values(self):
         # grid
@@ -266,35 +244,33 @@ class SudokuGame:
                     return False
         return True
 
-    def solve_2darr(self, t, grid, r, c):
-        # if t < 10:
+    def solve_2darr(self,grid, r, c):
         if r == self.m - 1 and c == self.m:
             return True
         if c == self.m:
             r += 1
             c = 0
         if grid[r][c] > 0:
-            return self.solve_2darr(t, grid, r, c + 1)
+            return self.solve_2darr(grid, r, c + 1)
 
         for n in range(1, self.m + 1, 1):
             if self.solve(grid, r, c, n):
                 grid[r][c] = n
-                if self.solve_2darr(t, grid, r, c + 1):
+                if self.solve_2darr(grid, r, c + 1):
                     return True
             grid[r][c] = 0
-        # else:
-        #     return False
         return False
 
     def get_solution(self, grid, r, c):
-        solution_time = time.perf_counter()
-        if self.solve_2darr(solution_time, grid, r, c):
+        if self.solve_2darr(grid, r, c):
             print('Solution found.')
-            return grid
+            self.solution_2d = grid
+            return True
         else:
             print(self.puzzle_2d)
+            self.print_game()
             print("Solution does not exist.")
-            return None
+            return False
 
     def perform_tests(self):
         '''
@@ -304,12 +280,20 @@ class SudokuGame:
         grid_result = self.test_grid_duplicates()
         column_result = self.test_column_duplicates()
         row_result = self.test_row_duplicates()
-        solution_result = self.test_solution_exists()
-        if False not in (seventeen_result, grid_result, column_result, row_result, solution_result):
-            print("Tests passed.")
-            return True
+        if False not in (seventeen_result, grid_result, column_result, row_result) and self.get_solution(self.puzzle_2d, 0, 0):
+            if self.solution_2d:
+                bools_45 = [True if sum(self.solution_2d[x]) == 45 else False for x in range(len(self.solution_2d))]
+                print(bools_45)
+                if False in bools_45:
+                    # print('Tests failed. Trying again.')
+                    self.generate_puzzle()
+                    self.perform_tests()
+                    return False
+                else:
+                    print('Tests passed')
+                    return True
         else:
-            print('Tests failed. Trying again.')
+            # print('Tests failed. Trying again.')
             self.generate_puzzle()
             self.perform_tests()
             return False
@@ -379,34 +363,42 @@ class SudokuGame:
                         continue
         return True
 
-    def test_solution_exists(self):
-        self.solution_2d = self.get_solution(self.puzzle_2d, 0, 0)
-        if self.solution_2d:
-            return True
-        else:
-            return False
 
-    @staticmethod
-    def generate_random_combo_1_9(g_c_or_r_list):
-        l = g_c_or_r_list
-        while 0 in l:
-            missing_i=[]
-            [missing_i.append(i) if value == 0 and i is not None else None for i, value in enumerate(l)]
-            not_in_s=rn.choice([x for x in range(10) if x not in l])
-            l[missing_i[0]] = not_in_s
-        if sum(l) == 45:
-            return l
-        else:
-            print('Something went wrong generating numbers..')
+    # @staticmethod
+    # def generate_random_combo_1_9(g_c_or_r_list):
+    #     l = g_c_or_r_list
+    #     while 0 in l:
+    #         missing_i=[]
+    #         [missing_i.append(i) if value == 0 and i is not None else None for i, value in enumerate(l)]
+    #         not_in_s=rn.choice([x for x in range(10) if x not in l])
+    #         l[missing_i[0]] = not_in_s
+    #     if sum(l) == 45:
+    #         return l
+    #     else:
+    #         print('Something went wrong generating numbers..')
 
+def main():
+    s = SudokuGame('test1hunna')
+    s.print_game()
 
-s = SudokuGame('test1hunna')
-s.get_current_values()
-print(s.solution_2d)
-# s.raw_grid_2d_arr()
-# print(s.puzzle_2d)
-# print(s.puzzle_2d)
+    # ouzzle_266 = [[7,0,0,0,9,6,0,5,0],
+    #                 [0,3,0,0,0,0,0,0,1],
+    #                 [5,0,2,1,0,4,0,0,0],
+    #                 [0,0,0,5,0,0,0,1,8],
+    #                 [0,5,0,0,0,0,0,3,0],
+    #                 [3,6,0,0,0,1,0,0,0],
+    #                 [0,0,0,4,0,2,3,0,7],
+    #                 [1,0,0,0,0,0,0,2,0],
+    #                 [0,2,0,8,7,0,0,0,9]
+    # ]
+    # s.get_solution(ouzzle_266,0,0)
+    # s.print_game()
+main()
+
+# s.get_solution()
+#
 # print(s.solution_2d)
+
                         # KEY #
 
 #               A B C   D E F   G H I
