@@ -11,7 +11,6 @@ class Sudoku:
     def __init__(self,name):
         self.name = name
         self.puzzle = []
-        # self.staging = []
         self.solution = None
         self.rows = None
         self.grids = [[]]*9

@@ -2,21 +2,72 @@
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>sudoku</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 </head>
 <body>
-    <script>
-        var data = JSON.parse('{{ data | tojson }}');
-    </script>
 
-    <section class="content"></section>
-    <header>
-        {% block header %}{% endblock %}
-    </header>
-    {% for x in data: %}
-        <div>{{x}}</div>
-    {% endfor %}
-    {% block content %}{% endblock %}
-    </section>
+
+
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Sudoku</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarColor02">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Home
+              <span class="visually-hidden">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('get_puzzle') }}">My Game</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('get_solution') }}">Solution</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('create_game') }}">Create Game</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+
+
+
+      <br/>
+      <br/>
+      <br/>
+      <figure class="text-center">
+        <h2>Welcome to Sudoku.</h2>
+                <div class="centered" style="margin-right: 700px; margin-left: 700px;">
+            <table class="table table-hover" style="margin: 100px auto;margin-left: auto;margin-right: auto" >
+            <colgroup><col><col><col>
+            <colgroup><col><col><col>
+            <colgroup><col><col><col>
+            <tbody>
+            {% for i,x in data: %}
+            <tr class="table-primary"> <td>{{x[0]}}<td>{{x[1]}}<td>{{x[2]}}<td>{{x[3]}}<td>{{x[4]}}<td>{{x[5]}} <td>{{x[6]}} <td>{{x[7]}} <td>{{x[8]}}
+            {% if i in [2,5,8]: %}
+            <tbody>
+            {% endif %}
+            {% endfor %}
+            </table>
+      </div>
+        <a type="button" class="btn btn-primary" href="{{ ('/create-new-game') }}">My Game</a> &nbsp;
+        <a type="button" class="btn btn-primary" href="{{ ('/get-solution') }}">Show Solution</a> &nbsp;
+        <a type="button" class="btn btn-primary" href="{{ ('/create-new-game') }}">New Game</a> &nbsp;
+      </figure>
+
+
+
+
+
 </body>
 </html>
