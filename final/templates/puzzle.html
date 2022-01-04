@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style>
+table { border-collapse: collapse; font-family: Calibri, sans-serif; }
+colgroup, tbody { border: solid medium; }
+td { border: solid thin; height: 1.4em; width: 1.4em; text-align: center; padding: 0; }
+</style>
+<section class="content"></section>
+    <table>
+      <caption>Sudoku</caption>
+      <colgroup><col><col><col>
+      <colgroup><col><col><col>
+      <colgroup><col><col><col>
+      <tbody>
+        {% for i,x in data: %}
+           <tr> <td>{{x[0]}}<td>{{x[1]}}<td>{{x[2]}}<td>{{x[3]}}<td>{{x[4]}}<td>{{x[5]}} <td>{{x[6]}} <td>{{x[7]}} <td>{{x[8]}}
+            {% if i in [2,5,8]: %}
+            <tbody>
+            {% endif %}
+        {% endfor %}
+    </table>
+
+{% block content %}{% endblock %}
+</section>
+
+</body>
+</html>

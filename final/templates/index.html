@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script>
+        var data = JSON.parse('{{ data | tojson }}');
+    </script>
+
+    <section class="content"></section>
+    <header>
+        {% block header %}{% endblock %}
+    </header>
+    {% for x in data: %}
+        <div>{{x}}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+    </section>
+</body>
+</html>

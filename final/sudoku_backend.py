@@ -7,7 +7,7 @@ import time
 logging.basicConfig(filename='../dev_and_old/sudoku.log', encoding='utf-8', level=logging.DEBUG)
 
 
-class SudokuGame:
+class Sudoku:
     def __init__(self,name):
         self.name = name
         self.puzzle = []
@@ -161,9 +161,3 @@ class SudokuGame:
                 if grid[i + start_r][j + start_c] == n:
                     return False
         return True
-
-s = SudokuGame('Adam')
-s.new_game()
-s.print_puzzle()
-s.print_solution()
-s.print_puzzle()
